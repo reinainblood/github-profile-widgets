@@ -1,92 +1,61 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import axios from 'axios'
-import { GitCommit, GitFork, MessageSquare, Star } from 'lucide-react'
 
-type Activity = {
-    type: string
-    repo: {
+type Issue = {
+    title: string
+    html_url: string
+    repository: {
         name: string
+        private: boolean
     }
-    payload: {
-        commits?: Array<{ message: string }>
-    }
-    created_at: string
 }
 
-export default function RecentActivityCard() {
-    const [activities, setActivities] = useState<Activity[]>([])
+export default function AssignedIssuesCard() {
+    const [issues, setIssues] = useState<Issue[]>([])
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        const fetchRecentActivity = async () => {
+        const fetchAssignedIssues = async () => {
             try {
-                const response = await axios.get<Activity[]>('https://api.github.com/users/authenticated/events', {
-                    headers: {
-                        Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`
-                    }
-                })
-                setActivities(response.data.slice(0, 5))
+                const response = await fetch('/api/github-data?type=issues')
+                if (!response.ok) throw new Error('Failed to fetch issues')
+                const data = await response.json()
+                setIssues(data)
             } catch (error) {
-                console.error('Error fetching recent activity:', error)
+                console.error('Error fetching assigned issues:', error)
+                setError('Failed to fetch assigned issues. Please try again later.')
             } finally {
                 setLoading(false)
             }
         }
 
-        fetchRecentActivity()
+        fetchAssignedIssues()
     }, [])
-
-    const getActivityIcon = (type: string) => {
-        switch (type) {
-            case 'PushEvent':
-                return <GitCommit color="#9D00FF" />
-            case 'ForkEvent':
-                return <GitFork color="#9D00FF" />
-            case 'IssueCommentEvent':
-            case 'CommitCommentEvent':
-                return <MessageSquare color="#9D00FF" />
-            case 'WatchEvent':
-                return <Star color="#9D00FF" />
-            default:
-                return null
-        }
-    }
-
-    const getActivityDescription = (activity: Activity): string => {
-        switch (activity.type) {
-            case 'PushEvent':
-                return `Pushed ${activity.payload.commits?.length || 0} commit(s) to ${activity.repo.name}`
-            case 'ForkEvent':
-                return `Forked ${activity.repo.name}`
-            case 'IssueCommentEvent':
-                return `Commented on issue in ${activity.repo.name}`
-            case 'CommitCommentEvent':
-                return `Commented on commit in ${activity.repo.name}`
-            case 'WatchEvent':
-                return `Starred ${activity.repo.name}`
-            default:
-                return `Activity in ${activity.repo.name}`
-        }
-    }
 
     return (
         <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', background: '#1A1B26', color: '#FFFFFF', borderRadius: '10px', width: '400px' }}>
-            <h2 style={{ color: '#9D00FF', marginBottom: '15px' }}>Recent Activity</h2>
+            <h2 style={{ color: '#9D00FF', marginBottom: '15px' }}>Assigned Issues</h2>
             {loading ? (
                 <p>Loading...</p>
-            ) : activities.length > 0 ? (
+            ) : error ? (
+                <p style={{ color: '#FF6B6B' }}>{error}</p>
+            ) : issues.length > 0 ? (
                 <ul style={{ listStyleType: 'none', padding: 0 }}>
-                    {activities.map((activity, index) => (
-                        <li key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
-                            <span style={{ marginRight: '10px' }}>{getActivityIcon(activity.type)}</span>
-                            <span>{getActivityDescription(activity)}</span>
+                    {issues.map((issue, index) => (
+                        <li key={index} style={{ marginBottom: '10px' }}>
+                            <a href={issue.html_url} target="_blank" rel="noopener noreferrer" style={{ color: '#9D00FF', textDecoration: 'none' }}>
+                                {issue.title}
+                            </a>
+                            <span style={{ color: '#888', fontSize: '0.8em', marginLeft: '5px' }}>
+                ({issue.repository.name}) {issue.repository.private ? '🔒' : ''}
+              </span>
                         </li>
                     ))}
                 </ul>
             ) : (
-                <p>No recent activity found.</p>
+                <p>No assigned issues found.</p>
             )}
         </div>
     )

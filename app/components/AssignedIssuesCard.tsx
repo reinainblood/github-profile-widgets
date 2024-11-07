@@ -1,31 +1,31 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 
 type Issue = {
     title: string
     html_url: string
     repository: {
         name: string
+        private: boolean
     }
 }
 
 export default function AssignedIssuesCard() {
     const [issues, setIssues] = useState<Issue[]>([])
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchAssignedIssues = async () => {
             try {
-                const response = await axios.get<Issue[]>('https://api.github.com/issues?filter=assigned&state=open', {
-                    headers: {
-                        Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`
-                    }
-                })
-                setIssues(response.data.slice(0, 5))
+                const response = await fetch('/api/github-data?type=issues')
+                if (!response.ok) throw new Error('Failed to fetch issues')
+                const data = await response.json()
+                setIssues(data)
             } catch (error) {
                 console.error('Error fetching assigned issues:', error)
+                setError('Failed to fetch assigned issues. Please try again later.')
             } finally {
                 setLoading(false)
             }
@@ -39,6 +39,8 @@ export default function AssignedIssuesCard() {
             <h2 style={{ color: '#9D00FF', marginBottom: '15px' }}>Assigned Issues</h2>
             {loading ? (
                 <p>Loading...</p>
+            ) : error ? (
+                <p style={{ color: '#FF6B6B' }}>{error}</p>
             ) : issues.length > 0 ? (
                 <ul style={{ listStyleType: 'none', padding: 0 }}>
                     {issues.map((issue, index) => (
@@ -47,7 +49,7 @@ export default function AssignedIssuesCard() {
                                 {issue.title}
                             </a>
                             <span style={{ color: '#888', fontSize: '0.8em', marginLeft: '5px' }}>
-                ({issue.repository.name})
+                ({issue.repository.name}) {issue.repository.private ? '🔒' : ''}
               </span>
                         </li>
                     ))}
