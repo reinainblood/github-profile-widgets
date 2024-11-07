@@ -1,0 +1,45 @@
+/* Card.css */
+.card {
+    position: relative;
+    padding: 20px;
+    border: 1px solid;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+    animation: scaleInAnimation 0.8s ease-in-out forwards;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.icon {
+    margin-right: 10px;
+    font-size: 1.5rem;
+}
+
+.card-body {
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+@keyframes scaleInAnimation {
+    from {
+        transform: scale(0.9);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeInAnimation {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
