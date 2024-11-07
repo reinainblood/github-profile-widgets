@@ -1,0 +1,20 @@
+.recent-activity-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.activity-item {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+}
+
+.activity-icon {
+    margin-right: 10px;
+}
+
+.recent-activity-title {
+    color: #9D00FF;
+    margin-bottom: 15px;
+}

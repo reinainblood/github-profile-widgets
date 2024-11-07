@@ -1,0 +1,17 @@
+.issues-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.issue-item {
+    margin-bottom: 10px;
+}
+
+.issue-link {
+    color: #9D00FF;
+    text-decoration: none;
+}
+
+.issue-repo {
+    color: #888;
+}
