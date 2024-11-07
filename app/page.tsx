@@ -1,5 +1,6 @@
 import AssignedIssuesCard from './components/AssignedIssuesCard'
 import RecentActivityCard from './components/RecentActivityCard'
+import RepositoryShowcaseCard from "./components/RepositoryShowcaseCard";
 
 export default function Home() {
     return (
@@ -8,6 +9,7 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-4">
                 <AssignedIssuesCard />
                 <RecentActivityCard />
+                <RepositoryShowcaseCard />
             </div>
         </main>
     )
