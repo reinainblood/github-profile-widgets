@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { GitCommit, GitFork, MessageSquare, Star } from 'lucide-react'
@@ -13,14 +15,18 @@ type Activity = {
     created_at: string
 }
 
-export default function RecentActivityCard({ username = 'reinainblood' }: { username?: string }) {
+export default function RecentActivityCard() {
     const [activities, setActivities] = useState<Activity[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchRecentActivity = async () => {
             try {
-                const response = await axios.get<Activity[]>(`https://api.github.com/users/${username}/events/public`)
+                const response = await axios.get<Activity[]>('https://api.github.com/users/authenticated/events', {
+                    headers: {
+                        Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`
+                    }
+                })
                 setActivities(response.data.slice(0, 5))
             } catch (error) {
                 console.error('Error fetching recent activity:', error)
@@ -30,7 +36,7 @@ export default function RecentActivityCard({ username = 'reinainblood' }: { user
         }
 
         fetchRecentActivity()
-    }, [username])
+    }, [])
 
     const getActivityIcon = (type: string) => {
         switch (type) {
