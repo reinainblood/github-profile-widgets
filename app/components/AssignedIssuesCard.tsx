@@ -48,7 +48,7 @@ export default function AssignedIssuesCard() {
             height={300}
             customTitle="Assigned Issues"
             titleColor="#9D00FF"
-            textColor="#FFFFFF"
+            textColor="#b8b9b9"
             bgColor="#1A1B26"
             borderColor="#9D00FF"
         >
