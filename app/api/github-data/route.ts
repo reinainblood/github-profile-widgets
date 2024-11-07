@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     if (type === 'issues') {
         url = 'https://api.github.com/issues?filter=assigned&state=open&per_page=5'
     } else if (type === 'activities') {
-        url = 'https://api.github.com/user/events?per_page=5'
+        url = 'https://api.github.com/users/reinainblood/events?per_page=5'
     } else {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
