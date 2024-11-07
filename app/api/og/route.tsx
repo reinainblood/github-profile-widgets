@@ -22,17 +22,20 @@ type Activity = {
 
 export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams
-    const username = searchParams.get('username') || 'reinainblood'
     const type = searchParams.get('type') || 'issues'
     const count = parseInt(searchParams.get('count') || '5', 10)
 
     const githubToken = process.env.GITHUB_ACCESS_TOKEN
 
+    if (!githubToken) {
+        return new Response('GitHub token is required', { status: 400 })
+    }
+
     let content
     if (type === 'issues') {
-        content = await getAssignedIssues(username, count, githubToken)
+        content = await getAssignedIssues(count, githubToken)
     } else if (type === 'activity') {
-        content = await getRecentActivity(username, count, githubToken)
+        content = await getRecentActivity(count, githubToken)
     } else {
         return new Response('Invalid type', { status: 400 })
     }
@@ -80,21 +83,18 @@ export async function GET(req: NextRequest) {
     )
 }
 
-async function getAssignedIssues(username: string, count: number, token?: string) {
+async function getAssignedIssues(count: number, token: string) {
     const headers: HeadersInit = {
-        'Accept': 'application/vnd.github.v3+json'
-    }
-    if (token) {
-        headers['Authorization'] = `token ${token}`
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': `token ${token}`
     }
 
-    const res = await fetch(`https://api.github.com/search/issues?q=assignee:${username}+is:open&per_page=${count}`, { headers })
-    const data = await res.json()
-    const issues: Issue[] = data.items.slice(0, count)
+    const res = await fetch(`https://api.github.com/issues?filter=assigned&state=open&per_page=${count}`, { headers })
+    const issues: Issue[] = await res.json()
 
     return (
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {issues.map((issue, index) => (
+            {issues.slice(0, count).map((issue, index) => (
                 <li key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#9D00FF', marginRight: '10px' }} />
                     <div>
@@ -109,15 +109,13 @@ async function getAssignedIssues(username: string, count: number, token?: string
     )
 }
 
-async function getRecentActivity(username: string, count: number, token?: string) {
+async function getRecentActivity(count: number, token: string) {
     const headers: HeadersInit = {
-        'Accept': 'application/vnd.github.v3+json'
-    }
-    if (token) {
-        headers['Authorization'] = `token ${token}`
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': `token ${token}`
     }
 
-    const res = await fetch(`https://api.github.com/users/${username}/events/public?per_page=${count}`, { headers })
+    const res = await fetch(`https://api.github.com/users/authenticated/events?per_page=${count}`, { headers })
     const activities: Activity[] = await res.json()
 
     return (
