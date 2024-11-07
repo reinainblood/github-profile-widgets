@@ -14,7 +14,7 @@ export default function AssignedIssuesCard({ username = 'reinainblood' }: { user
     useEffect(() => {
         const fetchAssignedIssues = async () => {
             try {
-                const response = await axios.get(`https://api.github.com/search/issues?q=assignee:${username}+is:open`)
+                const response = await axios.get<{ items: Issue[] }>(`https://api.github.com/search/issues?q=assignee:${username}+is:open`)
                 setIssues(response.data.items.slice(0, 5))
             } catch (error) {
                 console.error('Error fetching assigned issues:', error)

@@ -3,16 +3,34 @@ import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
+type Issue = {
+    title: string
+    html_url: string
+    repository_url: string
+}
+
+type Activity = {
+    type: string
+    repo: {
+        name: string
+    }
+    payload: {
+        commits?: Array<{ message: string }>
+    }
+    created_at: string
+}
+
 export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams
     const username = searchParams.get('username') || 'reinainblood'
     const type = searchParams.get('type') || 'issues'
+    const count = parseInt(searchParams.get('count') || '5', 10)
 
     let content
     if (type === 'issues') {
-        content = await getAssignedIssues(username)
+        content = await getAssignedIssues(username, count)
     } else if (type === 'activity') {
-        content = await getRecentActivity(username)
+        content = await getRecentActivity(username, count)
     } else {
         return new Response('Invalid type', { status: 400 })
     }
@@ -55,19 +73,19 @@ export async function GET(req: NextRequest) {
         ),
         {
             width: 400,
-            height: 300,
+            height: 300 + (count > 5 ? (count - 5) * 30 : 0),
         }
     )
 }
 
-async function getAssignedIssues(username: string) {
-    const res = await fetch(`https://api.github.com/search/issues?q=assignee:${username}+is:open`)
+async function getAssignedIssues(username: string, count: number) {
+    const res = await fetch(`https://api.github.com/search/issues?q=assignee:${username}+is:open&per_page=${count}`)
     const data = await res.json()
-    const issues = data.items.slice(0, 5)
+    const issues: Issue[] = data.items.slice(0, count)
 
     return (
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {issues.map((issue: any, index: number) => (
+            {issues.map((issue, index) => (
                 <li key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#9D00FF', marginRight: '10px' }} />
                     <div>
@@ -82,13 +100,13 @@ async function getAssignedIssues(username: string) {
     )
 }
 
-async function getRecentActivity(username: string) {
-    const res = await fetch(`https://api.github.com/users/${username}/events/public`)
-    const activities = await res.json()
+async function getRecentActivity(username: string, count: number) {
+    const res = await fetch(`https://api.github.com/users/${username}/events/public?per_page=${count}`)
+    const activities: Activity[] = await res.json()
 
     return (
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {activities.slice(0, 5).map((activity: any, index: number) => (
+            {activities.slice(0, count).map((activity, index) => (
                 <li key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#9D00FF', marginRight: '10px' }} />
                     <div style={{ color: '#FFFFFF' }}>{getActivityDescription(activity)}</div>
@@ -98,7 +116,7 @@ async function getRecentActivity(username: string) {
     )
 }
 
-function getActivityDescription(activity: any) {
+function getActivityDescription(activity: Activity): string {
     switch (activity.type) {
         case 'PushEvent':
             return `Pushed ${activity.payload.commits?.length || 0} commit(s) to ${activity.repo.name}`
