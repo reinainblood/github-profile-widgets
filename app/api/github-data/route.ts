@@ -18,13 +18,25 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
 
-    const response = await fetch(url, {
-        headers: {
-            Authorization: `token ${token}`,
-            Accept: 'application/vnd.github.v3+json'
-        }
-    })
+    try {
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `token ${token}`,
+              //  Accept: 'application/vnd.github.v3+json'
+                Accept: 'application/vnd.github.full+json'
+            }
+        })
 
-    const data = await response.json()
-    return NextResponse.json(data)
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error(`GitHub API error: ${response.status} - ${errorText}`)
+            return NextResponse.json({ error: 'Failed to fetch data from GitHub' }, { status: response.status })
+        }
+
+        const data = await response.json()
+        return NextResponse.json(data)
+    } catch (error) {
+        console.error('Error fetching data from GitHub:', error)
+        return NextResponse.json({ error: 'Failed to fetch data from GitHub' }, { status: 500 })
+    }
 }

@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
 
 async function getAssignedIssues(count: number, token: string) {
     const headers: HeadersInit = {
-        'Accept': 'application/vnd.github.v3+json',
+        'Accept': 'application/vnd.github.full+json',
         'Authorization': `token ${token}`
     }
 
