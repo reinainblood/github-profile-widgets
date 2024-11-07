@@ -26,11 +26,13 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type') || 'issues'
     const count = parseInt(searchParams.get('count') || '5', 10)
 
+    const githubToken = process.env.GITHUB_ACCESS_TOKEN
+
     let content
     if (type === 'issues') {
-        content = await getAssignedIssues(username, count)
+        content = await getAssignedIssues(username, count, githubToken)
     } else if (type === 'activity') {
-        content = await getRecentActivity(username, count)
+        content = await getRecentActivity(username, count, githubToken)
     } else {
         return new Response('Invalid type', { status: 400 })
     }
@@ -78,8 +80,15 @@ export async function GET(req: NextRequest) {
     )
 }
 
-async function getAssignedIssues(username: string, count: number) {
-    const res = await fetch(`https://api.github.com/search/issues?q=assignee:${username}+is:open&per_page=${count}`)
+async function getAssignedIssues(username: string, count: number, token?: string) {
+    const headers: HeadersInit = {
+        'Accept': 'application/vnd.github.v3+json'
+    }
+    if (token) {
+        headers['Authorization'] = `token ${token}`
+    }
+
+    const res = await fetch(`https://api.github.com/search/issues?q=assignee:${username}+is:open&per_page=${count}`, { headers })
     const data = await res.json()
     const issues: Issue[] = data.items.slice(0, count)
 
@@ -100,8 +109,15 @@ async function getAssignedIssues(username: string, count: number) {
     )
 }
 
-async function getRecentActivity(username: string, count: number) {
-    const res = await fetch(`https://api.github.com/users/${username}/events/public?per_page=${count}`)
+async function getRecentActivity(username: string, count: number, token?: string) {
+    const headers: HeadersInit = {
+        'Accept': 'application/vnd.github.v3+json'
+    }
+    if (token) {
+        headers['Authorization'] = `token ${token}`
+    }
+
+    const res = await fetch(`https://api.github.com/users/${username}/events/public?per_page=${count}`, { headers })
     const activities: Activity[] = await res.json()
 
     return (
