@@ -1,34 +1,58 @@
-.repository-showcase-card {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #1A1B26;
-    color: #FFFFFF;
-    border-radius: 10px;
-    width: 400px;
+.repositoryShowcaseCard {
+    margin-bottom: 2rem;
 }
 
-.showcase-title {
-    color: #9D00FF;
-    margin-bottom: 15px;
+.showcaseTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 
-.repository-list {
+.repositoryList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
     list-style-type: none;
     padding: 0;
 }
 
-.repository-item {
-    margin-bottom: 10px;
+.repositoryItem {
+    background-color: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 1rem;
+    width: calc(33.333% - 0.67rem);
+    min-width: 250px;
 }
 
-.repository-link {
-    color: #9D00FF;
+.repositoryLink {
+    color: #0366d6;
     text-decoration: none;
 }
 
-.repository-stats {
-    color: #888;
-    font-size: 0.8em;
+.repositoryLink:hover {
+    text-decoration: underline;
+}
+
+.repositoryDescription {
+    color: #586069;
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+}
+
+.repositoryStats {
     display: flex;
-    gap: 10px;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #586069;
+}
+
+.repositoryLanguage {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #586069;
+    background-color: #e1e4e8;
+    padding: 0.25rem 0.5rem;
+    border-radius: 2rem;
 }
